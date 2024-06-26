@@ -1,0 +1,25 @@
+import socket import threading
+# Define the server address and port SERVER_ADDR = '127.0.0.1'
+SERVER_PORT = 12345
+
+# Define the number of replicas NUM_REPLICAS = 3
+# Shared data among replicas shared_data = {}
+# Function to handle client requests def handle_client(client_socket):
+request = client_socket.recv(1024).decode() if request.startswith("GET"):
+key = request.split()[1] if key in shared_data:
+client_socket.send(shared_data[key].encode()) else:
+client_socket.send("Key not found".encode())
+ 
+elif request.startswith("PUT"): key, value = request.split()[1:] shared_data[key] = value
+client_socket.send("Data stored successfully".encode()) client_socket.close()
+# Function to start server def start_server():
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) server_socket.bind((SERVER_ADDR, SERVER_PORT)) server_socket.listen(5)
+print(f"Server listening on {SERVER_ADDR}:{SERVER_PORT}") while True:
+client_socket, _ = server_socket.accept()
+
+client_thread = threading.Thread(target=handle_client, args=(client_socket,)) client_thread.start()
+# Function to start replicas def start_replicas():
+for i in range(NUM_REPLICAS):
+
+replica_thread = threading.Thread(target=start_server) replica_thread.start()
+if _name_ == "_main_": start_replicas()
